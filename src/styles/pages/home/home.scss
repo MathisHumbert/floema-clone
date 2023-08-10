@@ -14,33 +14,33 @@
 .home__wrapper {
   @extend %cover;
 
-  // &:before,
-  // &:after {
-  //   content: '';
-  //   height: 35rem;
-  //   left: 0;
-  //   position: absolute;
-  //   width: 100%;
-  //   z-index: 1;
-  // }
+  &:before,
+  &:after {
+    content: '';
+    height: 35rem;
+    left: 0;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+  }
 
-  // &:before {
-  //   background: linear-gradient(
-  //     to bottom,
-  //     $color-contessa 15%,
-  //     rgba($color-contessa, 0) 100%
-  //   );
-  //   top: 0;
-  // }
+  &:before {
+    background: linear-gradient(
+      to bottom,
+      $color-contessa 15%,
+      rgba($color-contessa, 0) 100%
+    );
+    top: 0;
+  }
 
-  // &:after {
-  //   background: linear-gradient(
-  //     to top,
-  //     $color-contessa 15%,
-  //     rgba($color-contessa, 0) 100%
-  //   );
-  //   bottom: 0;
-  // }
+  &:after {
+    background: linear-gradient(
+      to top,
+      $color-contessa 15%,
+      rgba($color-contessa, 0) 100%
+    );
+    bottom: 0;
+  }
 }
 
 .home__titles {

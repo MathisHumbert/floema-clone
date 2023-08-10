@@ -1,12 +1,102 @@
-import React from 'react';
-import { useSinglePrismicDocument } from '@prismicio/react';
+import React, { useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+
+import usePage from '../../context/pageContext';
 
 export default function Home() {
-  const [home] = useSinglePrismicDocument('home');
+  const element = useRef();
+  const { loadPage, loaded, data } = usePage();
+
+  useEffect(() => {
+    loadPage('home');
+  }, []);
+
+  useEffect(() => {
+    if (!element.current) return;
+
+    element.current.classList.add('home--active');
+
+    gsap.set(document.documentElement, {
+      backgroundColor: element.current.getAttribute('data-background'),
+      color: element.current.getAttribute('data-color'),
+    });
+  }, [loaded]);
+
+  if (!loaded) return null;
+
+  const { home, collections } = data;
 
   return (
-    <div className='home home--active'>
-      <div className='home__wrapper'>HOME</div>
+    <div
+      ref={element}
+      className='home'
+      data-background='#C97164'
+      data-color='#F9F1E7'
+    >
+      <div className='home__wrapper'>
+        <div className='home__titles'>
+          {collections.map((collection, index) => (
+            <React.Fragment key={index}>
+              <div className='home__titles__label'>
+                <div className='home__titles__label__text'>
+                  {home.data.collection}{' '}
+                  {index == 0
+                    ? 'One'
+                    : index == 1
+                    ? 'Two'
+                    : index == 2
+                    ? 'Three'
+                    : index == 3
+                    ? 'Four'
+                    : ''}
+                </div>
+              </div>
+              <div className='home__titles__title'>
+                <div className='home__titles__title__text'>
+                  {collection.data.title}
+                </div>
+              </div>
+            </React.Fragment>
+          ))}
+        </div>
+        <div className='home__gallery'>
+          {home.data.gallery.map((media, index) => (
+            <figure
+              key={index}
+              className={`home__gallery__media home__gallery__media--${
+                (index % 5) + 1
+              }`}
+            >
+              <img
+                src={media.image.url}
+                data-src={media.image.url}
+                alt=''
+                className='home__gallery__media__image'
+              />
+            </figure>
+          ))}
+        </div>
+        <a href='' className='home__link' data-animation='button'>
+          <span>{home.data.button}</span>
+          <svg
+            className='home__link__icon'
+            xmlns='http://www.w3.org/2000/svg'
+            viewBox='0 0 288 60'
+          >
+            <path
+              stroke='#fff'
+              opacity='0.4'
+              fill='none'
+              d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z'
+            ></path>
+            <path
+              stroke='#fff'
+              fill='none'
+              d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z'
+            ></path>
+          </svg>
+        </a>
+      </div>
     </div>
   );
 }
