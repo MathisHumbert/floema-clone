@@ -1,18 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { PrismicProvider } from '@prismicio/react';
+import { ReactLenis } from '@studio-freight/react-lenis';
 
 import './styles/index.scss';
 import App from './App.jsx';
-import { client } from './utils/prismic';
 import { PageProvider } from './context/pageContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <PrismicProvider client={client}>
-      <PageProvider>
+    <PageProvider>
+      <ReactLenis root>
         <App />
-      </PageProvider>
-    </PrismicProvider>
+      </ReactLenis>
+    </PageProvider>
   </React.StrictMode>
 );

@@ -2,9 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
-import imagesLoaded from 'imagesloaded';
+import normalizeWheel from 'normalize-wheel';
 
 import usePage from '../../context/pageContext';
+import useTouchEvents from '../../hooks/useTouchEvent';
 import Media from './Media';
 
 export default function Home() {
@@ -24,50 +25,34 @@ export default function Home() {
     target: 0,
     ease: 0.1,
   });
+  const velocity = useRef(-2);
   const isDown = useRef(false);
 
-  const { loaded } = usePage();
+  const { pageLoaded } = usePage();
   const planeGeometry = new THREE.PlaneGeometry(1, 1, 20, 20);
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!pageLoaded) return;
 
     const galleryElement = document.querySelector('.home__gallery');
     const mediasElements = document.querySelectorAll(
       '.home__gallery__media__image'
     );
 
-    const imgLoaded = imagesLoaded(mediasElements, {
-      background: true,
-    });
-
-    imgLoaded.on('done', () => {
-      setGallery(galleryElement);
-      setMedias([...mediasElements]);
-    });
-  }, [loaded]);
+    setGallery(galleryElement);
+    setMedias([...mediasElements]);
+  }, [pageLoaded]);
 
   useEffect(() => {
-    window.addEventListener('mousedown', onTouchDown);
-    window.addEventListener('mousemove', onTouchMove);
-    window.addEventListener('mouseup', onTouchUp);
-
-    window.addEventListener('touchstart', onTouchDown);
-    window.addEventListener('touchmove', onTouchMove);
-    window.addEventListener('touchend', onTouchUp);
-
     document.body.classList.remove('loading');
-
-    () => {
-      window.removeEventListener('mousedown', onTouchDown);
-      window.removeEventListener('mousemove', onTouchMove);
-      window.removeEventListener('mouseup', onTouchUp);
-
-      window.removeEventListener('touchstart', onTouchDown);
-      window.removeEventListener('touchmove', onTouchMove);
-      window.removeEventListener('touchend', onTouchUp);
-    };
   }, []);
+
+  const onWheel = (event) => {
+    const { pixelY } = normalizeWheel(event);
+
+    scroll.current.target -= pixelY;
+    velocity.current = pixelY > 0 ? -2 : 2;
+  };
 
   const onTouchDown = (event) => {
     isDown.current = true;
@@ -91,7 +76,11 @@ export default function Home() {
     isDown.current = false;
   };
 
+  useTouchEvents(onWheel, onTouchDown, onTouchMove, onTouchUp);
+
   useFrame(() => {
+    scroll.current.target += velocity.current;
+
     speed.current.target =
       (scroll.current.target - scroll.current.current) * 0.001;
 
@@ -116,20 +105,25 @@ export default function Home() {
     scroll.current.last = scroll.current.current;
   });
 
-  if (!loaded || !gallery || !medias) return null;
+  if (!pageLoaded || !gallery || !medias) return null;
 
   return (
     <>
-      {medias.map((media) => (
-        <Media
-          key={index}
-          element={media}
-          galleryElement={gallery}
-          geometry={planeGeometry}
-          scroll={scroll.current}
-          speed={speed.current}
-        />
-      ))}
+      {medias.map((media, index) => {
+        const texture = window.TEXTURES[media.getAttribute('src')];
+
+        return (
+          <Media
+            key={index}
+            element={media}
+            galleryElement={gallery}
+            geometry={planeGeometry}
+            texture={texture}
+            scroll={scroll.current}
+            speed={speed.current}
+          />
+        );
+      })}
     </>
   );
 }

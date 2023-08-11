@@ -2,14 +2,17 @@ import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 
 import usePage from '../../context/pageContext';
+import Titles from './Titles';
 
 export default function Home() {
   const element = useRef();
-  const { loadPage, loaded, data } = usePage();
+  const { dataLoaded, pageLoaded, data, loadPage } = usePage();
 
   useEffect(() => {
-    loadPage('home');
-  }, []);
+    if (!dataLoaded) return;
+
+    loadPage();
+  }, [dataLoaded]);
 
   useEffect(() => {
     if (!element.current) return;
@@ -20,9 +23,9 @@ export default function Home() {
       backgroundColor: element.current.getAttribute('data-background'),
       color: element.current.getAttribute('data-color'),
     });
-  }, [loaded]);
+  }, [pageLoaded]);
 
-  if (!loaded) return null;
+  if (!dataLoaded) return null;
 
   const { home, collections } = data;
 
@@ -34,33 +37,9 @@ export default function Home() {
       data-color='#F9F1E7'
     >
       <div className='home__wrapper'>
-        <div className='home__titles'>
-          {collections.map((collection, index) => (
-            <React.Fragment key={index}>
-              <div className='home__titles__label'>
-                <div className='home__titles__label__text'>
-                  {home.data.collection}{' '}
-                  {index == 0
-                    ? 'One'
-                    : index == 1
-                    ? 'Two'
-                    : index == 2
-                    ? 'Three'
-                    : index == 3
-                    ? 'Four'
-                    : ''}
-                </div>
-              </div>
-              <div className='home__titles__title'>
-                <div className='home__titles__title__text'>
-                  {collection.data.title}
-                </div>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
+        <Titles collections={collections} />
         <div className='home__gallery'>
-          {home.data.gallery.map((media, index) => (
+          {[...home.data.gallery, ...home.data.gallery].map((media, index) => (
             <figure
               key={index}
               className={`home__gallery__media home__gallery__media--${

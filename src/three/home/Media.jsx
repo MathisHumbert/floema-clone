@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { useThree, useLoader, useFrame } from '@react-three/fiber';
-import { TextureLoader } from 'three';
+import { useThree, useFrame } from '@react-three/fiber';
 import { gsap } from 'gsap';
 
 import vertex from '../../shaders/home-vertex.glsl';
@@ -18,7 +17,21 @@ export default function Media({
   const galleryHeight = useRef(0);
   const extra = useRef(0);
   const { size, viewport } = useThree();
-  const texture = useLoader(TextureLoader, element.getAttribute('src'));
+  const texture = window.TEXTURES[element.getAttribute('src')];
+
+  const shaderArgs = useMemo(() => {
+    return {
+      uniforms: {
+        uTexture: { value: texture },
+        uAlpha: { value: 0 },
+        uSpeed: { value: 0 },
+        uViewportSizes: { value: { x: viewport.width, y: viewport.height } },
+      },
+      vertexShader: vertex,
+      fragmentShader: fragment,
+      transparent: true,
+    };
+  }, [texture]);
 
   useEffect(() => {
     const timelineIn = gsap.timeline({
@@ -47,11 +60,13 @@ export default function Media({
       (galleryElement.clientHeight / size.height) * viewport.height;
 
     bounds.current = {
-      top: rect.top,
+      top: rect.top + scroll.current,
       left: rect.left,
       width: rect.width,
       height: rect.height,
     };
+
+    extra.current = 0;
 
     updateScale();
     updateX();
@@ -62,20 +77,6 @@ export default function Media({
       y: viewport.height,
     };
   }, [viewport, size]);
-
-  const shaderArgs = useMemo(() => {
-    return {
-      uniforms: {
-        uTexture: { value: texture },
-        uAlpha: { value: 0 },
-        uSpeed: { value: 0 },
-        uViewportSizes: { value: { x: viewport.width, y: viewport.height } },
-      },
-      vertexShader: vertex,
-      fragmentShader: fragment,
-      transparent: true,
-    };
-  }, [texture]);
 
   const updateScale = () => {
     mesh.current.scale.x = (viewport.width * bounds.current.width) / size.width;
