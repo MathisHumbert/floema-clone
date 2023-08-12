@@ -53,7 +53,7 @@ export default function Home() {
               <img
                 src={media.image.url}
                 data-src={media.image.url}
-                alt=''
+                alt={media.image.alt}
                 className='home__gallery__media__image'
               />
             </figure>

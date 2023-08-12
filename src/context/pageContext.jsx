@@ -94,6 +94,10 @@ export function PageProvider({ children }) {
       }
     });
 
+    about.data.gallery.forEach((item) => {
+      assets.push(item.image.url);
+    });
+
     window.TEXTURES = {};
 
     const textureLoader = new TextureLoader();
@@ -115,7 +119,11 @@ export function PageProvider({ children }) {
   };
 
   const loadPage = () => {
-    const imgLoaded = imagesLoaded(document.querySelectorAll('img'), {
+    const images = [...document.querySelectorAll('img')].filter(
+      (img) => img.getAttribute('src') !== null
+    );
+
+    const imgLoaded = imagesLoaded(images, {
       background: true,
     });
 

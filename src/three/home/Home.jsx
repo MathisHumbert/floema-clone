@@ -43,10 +43,6 @@ export default function Home() {
     setMedias([...mediasElements]);
   }, [pageLoaded]);
 
-  useEffect(() => {
-    document.body.classList.remove('loading');
-  }, []);
-
   const onWheel = (event) => {
     const { pixelY } = normalizeWheel(event);
 
@@ -109,21 +105,16 @@ export default function Home() {
 
   return (
     <>
-      {medias.map((media, index) => {
-        const texture = window.TEXTURES[media.getAttribute('src')];
-
-        return (
-          <Media
-            key={index}
-            element={media}
-            galleryElement={gallery}
-            geometry={planeGeometry}
-            texture={texture}
-            scroll={scroll.current}
-            speed={speed.current}
-          />
-        );
-      })}
+      {medias.map((media, index) => (
+        <Media
+          key={index}
+          element={media}
+          galleryElement={gallery}
+          geometry={planeGeometry}
+          scroll={scroll.current}
+          speed={speed.current}
+        />
+      ))}
     </>
   );
 }
