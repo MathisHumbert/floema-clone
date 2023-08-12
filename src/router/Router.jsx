@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { gsap } from 'gsap';
 
 import usePage from '../context/pageContext';
 
 export const Route = ({ path, component }) => {
+  const { onPageChange } = usePage();
+
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
-  const navigate = () => {
+  const navigate = async () => {
+    await onPageChange();
+
     setCurrentPath(window.location.pathname);
   };
 
@@ -17,13 +22,9 @@ export const Route = ({ path, component }) => {
   return currentPath === path ? React.createElement(component) : null;
 };
 
-export const Link = ({ to, children }) => {
-  const { setLoaded } = usePage();
-
+export const Link = React.forwardRef(({ to, children, ...props }, ref) => {
   const preventDefault = (e) => {
     e.preventDefault();
-
-    setLoaded(false);
 
     window.history.pushState({}, '', to);
     const LocationChange = new PopStateEvent('navigate');
@@ -31,8 +32,8 @@ export const Link = ({ to, children }) => {
   };
 
   return (
-    <a href={to} onClick={preventDefault}>
+    <a ref={ref} href={to} onClick={preventDefault} {...props}>
       {children}
     </a>
   );
-};
+});

@@ -7,11 +7,11 @@ import App from './App.jsx';
 import { PageProvider } from './context/pageContext';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <PageProvider>
-      <ReactLenis root>
-        <App />
-      </ReactLenis>
-    </PageProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <PageProvider>
+    <ReactLenis root>
+      <App />
+    </ReactLenis>
+  </PageProvider>
+  // </React.StrictMode>
 );

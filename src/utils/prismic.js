@@ -9,6 +9,24 @@ export const client = prismic.createClient(
         type: 'home',
         path: '/',
       },
+      { type: 'about', path: '/about' },
+      { type: 'collections', path: '/collections' },
     ],
   }
 );
+
+export const linkResolver = (doc) => {
+  if (doc.type === 'product') {
+    return `/detail/${doc.uid}`;
+  }
+
+  if (doc.type === 'collections') {
+    return '/collections';
+  }
+
+  if (doc.type === 'about') {
+    return '/about';
+  }
+
+  return '/';
+};

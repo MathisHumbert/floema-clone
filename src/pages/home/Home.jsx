@@ -1,8 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 
-import usePage from '../../context/pageContext';
 import Titles from './Titles';
+import { Link } from '../../router/Router';
+import Button from '../../components/Button';
+import usePage from '../../context/pageContext';
+import { linkResolver } from '../../utils/prismic';
 
 export default function Home() {
   const element = useRef();
@@ -15,7 +18,7 @@ export default function Home() {
   }, [dataLoaded]);
 
   useEffect(() => {
-    if (!element.current) return;
+    if (!element.current || !pageLoaded) return;
 
     element.current.classList.add('home--active');
 
@@ -33,6 +36,7 @@ export default function Home() {
     <div
       ref={element}
       className='home'
+      id='page'
       data-background='#C97164'
       data-color='#F9F1E7'
     >
@@ -55,26 +59,28 @@ export default function Home() {
             </figure>
           ))}
         </div>
-        <a href='' className='home__link' data-animation='button'>
-          <span>{home.data.button}</span>
-          <svg
-            className='home__link__icon'
-            xmlns='http://www.w3.org/2000/svg'
-            viewBox='0 0 288 60'
-          >
-            <path
-              stroke='#fff'
-              opacity='0.4'
-              fill='none'
-              d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z'
-            ></path>
-            <path
-              stroke='#fff'
-              fill='none'
-              d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z'
-            ></path>
-          </svg>
-        </a>
+        <Link to={linkResolver(home.data.collections)} className='home__link'>
+          <Button className='home__link__button' data-animation='button'>
+            <span>{home.data.button}</span>
+            <svg
+              className='home__link__icon'
+              xmlns='http://www.w3.org/2000/svg'
+              viewBox='0 0 288 60'
+            >
+              <path
+                stroke='#fff'
+                opacity='0.4'
+                fill='none'
+                d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z'
+              ></path>
+              <path
+                stroke='#fff'
+                fill='none'
+                d='M144,0.5c79.25,0,143.5,13.21,143.5,29.5S223.25,59.5,144,59.5S0.5,46.29,0.5,30S64.75,0.5,144,0.5z'
+              ></path>
+            </svg>
+          </Button>
+        </Link>
       </div>
     </div>
   );

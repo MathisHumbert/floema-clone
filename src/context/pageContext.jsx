@@ -1,6 +1,14 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useRef,
+} from 'react';
 import imagesLoaded from 'imagesloaded';
 import { TextureLoader } from 'three';
+import { gsap } from 'gsap';
 
 import { client } from '../utils/prismic';
 
@@ -8,17 +16,40 @@ const PageContext = createContext({
   data: {},
   dataLoaded: false,
   pageLoaded: false,
+  setPageLoaded: () => {},
+  page: '',
+  setPage: () => {},
   loadPage: () => {},
+  asynconPageChange: async () => {},
 });
 
 export function PageProvider({ children }) {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [data, setData] = useState({});
   const [pageLoaded, setPageLoaded] = useState(false);
+  const [page, setPage] = useState(window.location.pathname);
+  const transitionElement = useRef();
+  const transtionContext = useRef();
+  const transtionProgress = useRef({ value: 0 });
+  const transtionColor = useRef();
 
   useEffect(() => {
+    createTransition();
     loadData();
   }, []);
+
+  const createTransition = () => {
+    transitionElement.current = document.createElement('canvas');
+    transitionElement.current.className = 'transition';
+    transitionElement.current.height =
+      window.innerHeight * window.devicePixelRatio;
+    transitionElement.current.width =
+      window.innerWidth * window.devicePixelRatio;
+
+    transtionContext.current = transitionElement.current.getContext('2d');
+
+    document.getElementById('root').appendChild(transitionElement.current);
+  };
 
   const loadData = async () => {
     const about = await client.getSingle('about');
@@ -90,12 +121,100 @@ export function PageProvider({ children }) {
 
     imgLoaded.on('done', () => {
       setPageLoaded(true);
+
+      if (transtionProgress.value !== 0) {
+        hideTransition();
+      }
     });
   };
 
+  const onPageChange = () => {
+    transtionColor.current = document
+      .getElementById('page')
+      .getAttribute('data-color');
+
+    // sow tranisition
+    return new Promise((resolve) => {
+      showTransition(resolve);
+    });
+  };
+
+  const showTransition = (resolve) => {
+    gsap.set(transitionElement.current, { rotation: 0 });
+
+    gsap.to(transtionProgress.current, {
+      value: 1,
+      duration: 1.5,
+      ease: 'expo.inOut',
+      onComplete: () => {
+        setPageLoaded(false);
+        setPage(window.location.pathname);
+        resolve();
+      },
+      onUpdate: updateTransition,
+    });
+  };
+
+  const hideTransition = () => {
+    gsap.set(transitionElement.current, { rotation: 180 });
+
+    gsap.to(transtionProgress.current, {
+      value: 0,
+      duration: 1.5,
+      ease: 'expo.inOut',
+      onUpdate: updateTransition,
+    });
+  };
+
+  const updateTransition = () => {
+    transtionContext.current.clearRect(
+      0,
+      0,
+      transitionElement.current.width,
+      transitionElement.current.height
+    );
+    transtionContext.current.save();
+    transtionContext.current.beginPath();
+
+    const widthSegments = Math.ceil(transitionElement.current.width / 40);
+    transtionContext.current.moveTo(
+      transitionElement.current.width,
+      transitionElement.current.height
+    );
+    transtionContext.current.lineTo(0, transitionElement.current.height);
+
+    const t =
+      (1 - transtionProgress.current.value) * transitionElement.current.height;
+    const amplitude = 250 * Math.sin(transtionProgress.current.value * Math.PI);
+
+    transtionContext.current.lineTo(0, t);
+
+    for (let index = 0; index <= widthSegments; index++) {
+      const n = 40 * index;
+      const r =
+        t -
+        Math.sin((n / transitionElement.current.width) * Math.PI) * amplitude;
+
+      transtionContext.current.lineTo(n, r);
+    }
+
+    transtionContext.current.fillStyle = transtionColor.current;
+    transtionContext.current.fill();
+    transtionContext.current.restore();
+  };
+
   const memoedValue = useMemo(
-    () => ({ data, pageLoaded, dataLoaded, loadPage }),
-    [data, pageLoaded, dataLoaded]
+    () => ({
+      data,
+      pageLoaded,
+      setPageLoaded,
+      dataLoaded,
+      page,
+      setPage,
+      loadPage,
+      onPageChange,
+    }),
+    [data, pageLoaded, dataLoaded, page]
   );
 
   return (

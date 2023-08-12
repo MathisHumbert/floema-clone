@@ -118,20 +118,23 @@
 }
 
 .home__link {
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+}
+
+.home__link__button {
   @extend %description-14;
 
   align-items: center;
-  bottom: 5rem;
   display: flex;
   height: 6rem;
   justify-content: center;
-  left: 50%;
   letter-spacing: 0.05rem;
-  position: absolute;
   text-transform: uppercase;
-  transform: translateX(-50%);
   width: 28.8rem;
-  z-index: 2;
 
   span {
     display: inline-block;
