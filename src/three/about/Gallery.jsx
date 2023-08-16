@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import { useLenis } from '@studio-freight/react-lenis';
+import { gsap } from 'gsap';
 
 import Media from './Media';
 import useTouchEvents from '../../hooks/useTouchEvent';
-import { useFrame, useThree } from '@react-three/fiber';
-import { gsap } from 'gsap';
-import { useLenis } from '@studio-freight/react-lenis';
 
 export default function Gallery({ element, geometry }) {
   const [wrapper, setWrapper] = useState(null);
@@ -34,7 +34,7 @@ export default function Gallery({ element, geometry }) {
     const imagesElements = element.querySelectorAll(
       '.about__gallery__media__image'
     );
-    const wrapperElement = document.querySelector('.about__gallery__wrapper');
+    const wrapperElement = element.querySelector('.about__gallery__wrapper');
 
     setMedias([...mediasElements]);
     setImages([...imagesElements]);
@@ -110,11 +110,11 @@ export default function Gallery({ element, geometry }) {
       {medias.map((media, index) => (
         <Media
           key={index}
-          index={index}
           element={media}
           image={images[index]}
           geometry={geometry}
           scroll={scroll.current}
+          lenisScroll={lenisScroll.current}
           galleryWidth={galleryWidth}
         />
       ))}

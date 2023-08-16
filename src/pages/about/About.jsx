@@ -1,17 +1,31 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/all';
 import * as prismic from '@prismicio/client';
 
 import usePage from '../../context/pageContext';
+import Parallax from '../../components/Parallax';
+import { calculate, split } from '../../utils/text';
+import { DEFAULT as ease } from '../../utils/easing';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function About() {
   const element = useRef();
+  const paragraphElements = useRef();
   const { dataLoaded, pageLoaded, data, loadPage } = usePage();
 
   useEffect(() => {
     if (!dataLoaded) return;
 
     loadPage();
+    paragraphAnimation();
+
+    window.addEventListener('resize', () => {
+      paragraphElements.current.forEach((el) => {
+        el.groupLines = calculate(el.lines);
+      });
+    });
   }, [dataLoaded]);
 
   useEffect(() => {
@@ -24,6 +38,63 @@ export default function About() {
       color: element.current.getAttribute('data-color'),
     });
   }, [pageLoaded]);
+
+  const paragraphAnimation = () => {
+    paragraphElements.current = [
+      ...element.current.querySelectorAll('[data-animation="paragraph"]'),
+    ];
+
+    paragraphElements.current.forEach((el) => {
+      el.lines = [];
+      el.groupLines;
+      const paragraphs = [...el.querySelectorAll('h1, h2, p')];
+
+      if (paragraphs.length !== 0) {
+        paragraphs.forEach((p) => {
+          split({ element: p });
+          split({ element: p });
+
+          el.lines.push(...el.querySelectorAll('span span'));
+        });
+      } else {
+        split({ element: el });
+        split({ element: el });
+
+        el.lines.push(...el.querySelectorAll('span span'));
+      }
+
+      el.groupLines = calculate(el.lines);
+
+      gsap.set(el.groupLines, { yPercent: 100 });
+
+      ScrollTrigger.create({
+        trigger: el,
+        markers: true,
+        onEnter: () => {
+          el.groupLines.forEach((line, index) => {
+            gsap.to(line, {
+              yPercent: 0,
+              duration: 1.5,
+              delay: 0.1 * index,
+              ease,
+            });
+          });
+        },
+        onEnterBack: () => {
+          el.groupLines.forEach((line, index) => {
+            gsap.to(line, {
+              yPercent: 0,
+              duration: 1.5,
+              delay: 0.1 * index,
+              ease,
+            });
+          });
+        },
+        onLeave: () => gsap.set(el.groupLines, { yPercent: 100 }),
+        onLeaveBack: () => gsap.set(el.groupLines, { yPercent: 100 }),
+      });
+    });
+  };
 
   if (!dataLoaded) return null;
 
@@ -85,21 +156,22 @@ export default function About() {
                     </p>
                     <div
                       className='about__content__description'
+                      data-animation='paragraph'
                       dangerouslySetInnerHTML={{
                         __html: prismic.asHTML(section.primary.description),
                       }}
                     />
                   </div>
-                  <figure
+                  <Parallax
                     className='about__content__media'
                     data-animation='parallax'
                   >
                     <img
-                      data-src={section.primary.image.url}
+                      src={section.primary.image.url}
                       alt={section.primary.image.alt}
                       className='about__content__media__image'
                     />
-                  </figure>
+                  </Parallax>
                 </div>
               </section>
             );
@@ -131,17 +203,17 @@ export default function About() {
                   </a>
                   <div className='about__highlight__medias'>
                     {section.items.map((media, mediaIndex) => (
-                      <figure
+                      <Parallax
                         key={mediaIndex}
                         className='about__highlight__media'
                         data-animation='parallax'
                       >
                         <img
-                          data-src={media.image.url}
+                          src={media.image.url}
                           alt={media.image.alt}
                           className='about__highlight__media__image'
                         />
-                      </figure>
+                      </Parallax>
                     ))}
                   </div>
                 </div>

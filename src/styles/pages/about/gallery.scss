@@ -4,7 +4,7 @@
   overflow: hidden;
   pointer-events: none;
   position: relative;
-  // visibility: hidden;
+  visibility: hidden;
 
   &:first-child {
     margin-top: 0;
@@ -28,7 +28,6 @@
   margin: 0 4rem;
   position: relative;
   width: 30.9rem;
-  border: 1px solid red;
 }
 
 .about__gallery__media__image {

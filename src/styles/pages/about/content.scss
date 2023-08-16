@@ -130,7 +130,6 @@
 .about__content__media {
   overflow: hidden;
   position: relative;
-  border: 1px solid red;
 
   .about__content:nth-child(3) & {
     height: 80.8rem;
@@ -186,5 +185,6 @@
 .about__content__media__image {
   @extend %cover;
 
+  opacity: 1;
   object-fit: cover;
 }

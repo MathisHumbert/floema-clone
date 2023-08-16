@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
+import { gsap } from 'gsap';
 
 import vertex from '../../shaders/plane-vertex.glsl';
 import fragment from '../../shaders/plane-fragment.glsl';
-import { gsap } from 'gsap';
+import { BREAKPOINT_PHONE } from '../../utils/breakpoints';
 
 export default function Media({
-  index,
   element,
   image,
   geometry,
   scroll,
+  lenisScroll,
   galleryWidth,
 }) {
   const mesh = useRef();
@@ -35,7 +36,7 @@ export default function Media({
     const rect = element.getBoundingClientRect();
 
     bounds.current = {
-      top: rect.top,
+      top: rect.top + lenisScroll.current,
       left: rect.left,
       width: rect.width,
       height: rect.height,
@@ -68,8 +69,7 @@ export default function Media({
       mesh.current.scale.y / 2 -
       ((bounds.current.top - y) / size.height) * viewport.height;
 
-    // const extra = Detection.isPhone() ? 15 : 60;
-    const extra = 60;
+    const extra = size.width < BREAKPOINT_PHONE ? 15 : 60;
 
     mesh.current.position.y +=
       Math.cos((mesh.current.position.x / viewport.width) * Math.PI * 0.1) *
