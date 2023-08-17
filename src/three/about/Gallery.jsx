@@ -45,8 +45,6 @@ export default function Gallery({ element, geometry }) {
     if (!wrapper) return;
 
     galleryWidth.current = (wrapper.clientWidth / size.width) * viewport.width;
-
-    // reset scroll ???
   }, [size, viewport, wrapper]);
 
   const onTouchDown = (event) => {

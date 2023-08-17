@@ -72,9 +72,12 @@ export function PageProvider({ children }) {
     const products = [];
 
     collections.forEach((collection) => {
-      collection.data.products.forEach(({ products_product: { uid } }) => {
-        const p = productsData.find((product) => product.uid === uid);
-        products.push(p);
+      collection.data.products.forEach(({ products_product }) => {
+        const product = productsData.find(
+          (product) => product.uid === products_product.uid
+        );
+        products_product.data = product.data;
+        products.push(product);
       });
     });
 
@@ -96,6 +99,13 @@ export function PageProvider({ children }) {
 
     about.data.gallery.forEach((item) => {
       assets.push(item.image.url);
+    });
+
+    collections.forEach((collection) => {
+      collection.data.products.forEach((item) => {
+        assets.push(item.products_product.data.image.url);
+        assets.push(item.products_product.data.model.url);
+      });
     });
 
     window.TEXTURES = {};

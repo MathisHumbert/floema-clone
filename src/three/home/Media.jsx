@@ -70,7 +70,7 @@ export default function Media({
 
     updateScale();
     updateX();
-    updateY();
+    // updateY();
 
     mesh.current.material.uniforms.uViewportSizes.value = {
       x: viewport.width,
