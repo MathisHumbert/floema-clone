@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Prefix from 'prefix';
 import normalizeWheel from 'normalize-wheel';
 
 import { getOffset } from '../../utils/dom';
 import useTouchEvents from '../../hooks/useTouchEvent';
 import { gsap } from 'gsap';
+
+const transformPrefix = Prefix('transform');
 
 export default function Titles({ collections }) {
   const items = useRef([]);
@@ -33,8 +35,6 @@ export default function Titles({ collections }) {
       cancelAnimationFrame(updateId);
     };
   }, []);
-
-  const transformPrefix = useMemo(() => Prefix('transform'), []);
 
   const onResize = () => {
     items.current.forEach((element) => {

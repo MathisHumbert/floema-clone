@@ -1,6 +1,7 @@
 .detail {
-  @extend %center;
   @extend %page;
+  @extend %center;
+  @extend %cover;
 
   transform: translateY(100%);
   transition: opacity 0.5s 0.5s ease, transform 0s 0.5s,

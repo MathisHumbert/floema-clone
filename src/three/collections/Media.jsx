@@ -11,6 +11,7 @@ export default function Media({
   geometry,
   scroll,
   activeIndex,
+  visible,
 }) {
   const group = useRef();
   const jewlery = useRef();
@@ -79,11 +80,45 @@ export default function Media({
       jewlery.current.scale.x / 2 +
       x.current * viewport.width;
 
+    group.current.index = index;
+  }, []);
+
+  useEffect(() => {
+    if (visible.state) {
+      // show();
+      // if (index === visible.index) {
+      //   animateOut();
+      // }
+    } else {
+      if (index === visible.index) {
+        animateIn();
+      } else {
+        hide();
+      }
+    }
+  }, [visible]);
+
+  const show = () => {
     gsap.to(opacity.current, {
       multiplier: 1,
       delay: 0.5,
     });
-  }, []);
+  };
+
+  const hide = () => {
+    gsap.to(opacity.current, {
+      multiplier: 0,
+      delay: 0.5,
+    });
+  };
+
+  const animateIn = () => {
+    gsap.to(animation, { current: 1, duration: 2, ease: 'expo.inOut' });
+  };
+
+  const animateOut = () => {
+    gsap.to(animation, { current: 0, duration: 2, ease: 'expo.inOut' });
+  };
 
   const updateScale = () => {
     // replace 0 by detailDOM.bounds

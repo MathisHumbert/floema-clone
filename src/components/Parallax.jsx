@@ -1,10 +1,12 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
 import Prefix from 'prefix';
 import { useLenis } from '@studio-freight/react-lenis';
 
 import { BREAKPOINT_TABLET } from '../utils/breakpoints';
 import { getOffset } from '../utils/dom';
 import { map, clamp } from '../utils/math';
+
+const transformPrefix = Prefix('transform');
 
 export default function Parallax({ children, ...props }) {
   const element = useRef();
@@ -14,8 +16,6 @@ export default function Parallax({ children, ...props }) {
   const amount = useRef(0);
   const offset = useRef();
   const lenisScroll = useRef(0);
-
-  const transformPrefix = useMemo(() => Prefix('transform'), []);
 
   useEffect(() => {
     media.current = element.current.children[0];

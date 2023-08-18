@@ -1,19 +1,32 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { act, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import normalizeWheel from 'normalize-wheel';
+import Prefix from 'prefix';
 
+import Media from './Media';
 import usePage from '../../context/pageContext';
 import useTouchEvents from '../../hooks/useTouchEvent';
-import Media from './Media';
+import { getOffset } from '../../utils/dom';
+
+const planeGeometry = new THREE.PlaneGeometry(1, 1, 1, 1);
+const transformPrefix = Prefix('transform');
 
 export default function Collections() {
+  const [documentsSelected, setDocumentsSelected] = useState(false);
   const [galleryWrapper, setGalleryWrapper] = useState(null);
   const [medias, setMedias] = useState(null);
+  const [visible, setVisible] = useState({
+    index: null,
+    state: true,
+  });
+  const mediasComponents = useRef();
   const collection = useRef();
   const collections = useRef();
   const collectionLinks = useRef();
+  const titles = useRef();
+  const titlesItems = useRef();
   const scroll = useRef({
     current: 0,
     target: 0,
@@ -27,9 +40,10 @@ export default function Collections() {
   });
   const isDown = useRef(false);
   const activeIndex = useRef(0);
+  const hit = useRef(null);
+
   const { pageLoaded } = usePage();
-  const planeGeometry = new THREE.PlaneGeometry(1, 1, 1, 1);
-  const { size, viewport } = useThree();
+  const { size, viewport, camera, raycaster, pointer, scene } = useThree();
 
   useEffect(() => {
     if (!pageLoaded) return;
@@ -40,6 +54,12 @@ export default function Collections() {
     const mediasElements = document.querySelectorAll(
       '.collections__gallery__media'
     );
+
+    const titlesElement = document.querySelector('.collections__titles');
+    const titlesItemsElements = document.querySelectorAll(
+      '.collections__titles__wrapper:nth-child(2) .collections__titles__item'
+    );
+
     const collectionsElement = document.querySelector('.collections');
     const collectionsElements = document.querySelectorAll(
       '.collections__article'
@@ -51,26 +71,61 @@ export default function Collections() {
     setMedias([...mediasElements]);
     setGalleryWrapper(galleryWrapperElement);
 
+    titles.current = titlesElement;
+    titlesItems.current = [...titlesItemsElements];
+
     collection.current = collectionsElement;
     collections.current = [...collectionsElements];
     collectionLinks.current = [...collectionsElementsLinks];
+
+    setDocumentsSelected(true);
   }, [pageLoaded]);
 
   useEffect(() => {
-    if (!galleryWrapper) return;
+    if (!documentsSelected) return;
 
     scroll.current.last = scroll.current.target = 0;
 
     scroll.current.limit = galleryWrapper.clientWidth - medias[0].clientWidth;
-  }, [size, viewport, galleryWrapper]);
+
+    collectionLinks.current.forEach((element) => {
+      element.bounds = getOffset(element);
+    });
+
+    titlesItems.current.forEach((element) => {
+      element.bounds = getOffset(element);
+    });
+  }, [size, viewport, documentsSelected]);
+
+  const onOpen = (index) => {
+    setVisible({
+      index,
+      state: false,
+    });
+
+    collection.current.classList.add('collections--open');
+  };
+
+  const onClose = () => {
+    setVisible({
+      index: null,
+      state: true,
+    });
+
+    collection.current.classList.remove('collections--open');
+  };
 
   const onWheel = (event) => {
+    if (!documentsSelected) return;
+
     const { pixelY } = normalizeWheel(event);
 
     scroll.current.target -= pixelY;
   };
 
   const onTouchDown = (event) => {
+    if (!documentsSelected) return;
+
     isDown.current = true;
 
     scroll.current.position = scroll.current.current;
@@ -80,9 +135,29 @@ export default function Collections() {
   };
 
   const onTouchMove = (event) => {
+    if (!documentsSelected) return;
+
+    raycaster.setFromCamera(pointer, camera);
+
+    const intersects = raycaster.intersectObjects(scene.children);
+
+    if (intersects.length > 0) {
+      const obj = intersects[0].object;
+      const parent = obj.parent || null;
+
+      if (parent !== null && parent.index === activeIndex.current) {
+        hit.current = parent.index;
+        document.body.style.cursor = 'pointer';
+      } else {
+        hit.current = null;
+        document.body.style.cursor = '';
+      }
+    }
+
     if (!isDown.current) return;
 
     const x = event.touches ? event.touches[0].clientX : event.clientX;
+
     const distance = scroll.current.start - x;
 
     scroll.current.target = scroll.current.position - distance;
@@ -90,6 +165,10 @@ export default function Collections() {
 
   const onTouchUp = () => {
     isDown.current = false;
+
+    if (hit.current !== null && activeIndex.current === hit.current) {
+      onOpen(hit.current);
+    }
   };
 
   useTouchEvents(onWheel, onTouchDown, onTouchMove, onTouchUp);
@@ -122,6 +201,8 @@ export default function Collections() {
 
     collectionLinks.current.forEach((element) => {
       const index = element.getAttribute('data-index');
+
+      map[index] += element?.bounds?.width;
     });
 
     const progress = [
@@ -158,10 +239,20 @@ export default function Collections() {
         )
       ),
     ];
+
+    let y = 0;
+
+    titlesItems.current.forEach((element, index) => {
+      y += element?.bounds?.height * progress[index];
+    });
+
+    titles.current.style[
+      transformPrefix
+    ] = `translateY(calc(-${y}px - 33.33% + ${window.innerHeight * 0.5}px))`;
   };
 
   useFrame(() => {
-    if (!medias) return;
+    if (!documentsSelected) return;
 
     scroll.current.target = gsap.utils.clamp(
       -scroll.current.limit,
@@ -210,6 +301,7 @@ export default function Collections() {
           geometry={planeGeometry}
           scroll={scroll.current}
           activeIndex={activeIndex}
+          visible={visible}
         />
       ))}
     </>
