@@ -4,14 +4,17 @@ import { gsap } from 'gsap';
 
 import vertex from '../../shaders/plane-vertex.glsl';
 import fragment from '../../shaders/plane-fragment.glsl';
+import MediaDom from './MediaDom';
 
 export default function Media({
   index,
   element,
+  detail,
   geometry,
   scroll,
   activeIndex,
   visible,
+  onClose,
 }) {
   const group = useRef();
   const jewlery = useRef();
@@ -35,6 +38,8 @@ export default function Media({
   const jewleryTexture = window.TEXTURES[imageElement.getAttribute('data-src')];
   const modelTexture =
     window.TEXTURES[imageElement.getAttribute('data-model-src')];
+
+  const detailDom = MediaDom({ element: detail, onClose, index });
 
   const jewleryShaderArgs = useMemo(() => {
     return {
@@ -70,6 +75,8 @@ export default function Media({
       height: rect.height,
     };
 
+    detailDom.onResize();
+
     updateScale();
     updateX();
   }, [viewport, size]);
@@ -85,10 +92,11 @@ export default function Media({
 
   useEffect(() => {
     if (visible.state) {
-      // show();
-      // if (index === visible.index) {
-      //   animateOut();
-      // }
+      show();
+
+      if (index === visible.index) {
+        animateOut();
+      }
     } else {
       if (index === visible.index) {
         animateIn();
@@ -108,30 +116,32 @@ export default function Media({
   const hide = () => {
     gsap.to(opacity.current, {
       multiplier: 0,
-      delay: 0.5,
     });
   };
 
   const animateIn = () => {
     gsap.to(animation, { current: 1, duration: 2, ease: 'expo.inOut' });
+
+    detailDom.animateIn();
   };
 
   const animateOut = () => {
     gsap.to(animation, { current: 0, duration: 2, ease: 'expo.inOut' });
+
+    detailDom.animateOut();
   };
 
   const updateScale = () => {
-    // replace 0 by detailDOM.bounds
     const width =
       gsap.utils.interpolate(
         collectionsBounds.current.width,
-        0,
+        detailDom.bounds.current.width,
         animation.current
       ) / size.width;
     const height =
       gsap.utils.interpolate(
         collectionsBounds.current.height,
-        0,
+        detailDom.bounds.current.height,
         animation.current
       ) / size.height;
 
@@ -143,10 +153,9 @@ export default function Media({
   };
 
   const updateX = (scroll = 0) => {
-    // replace 0 by detailDOM.bounds.lef
     const currentX = gsap.utils.interpolate(
       collectionsBounds.current.left + scroll,
-      0,
+      detailDom.bounds.current.left,
       animation.current
     );
 
@@ -173,7 +182,7 @@ export default function Media({
   useFrame(() => {
     if (!collectionsBounds.current) return;
 
-    // add updateScale
+    updateScale();
     updateX(scroll.current);
 
     const frequency = 500;

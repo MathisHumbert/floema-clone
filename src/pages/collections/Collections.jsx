@@ -15,7 +15,7 @@ export default function Collections() {
     if (!dataLoaded) return;
 
     loadPage();
-    // paragraphAnimation();
+    paragraphAnimation();
   }, [dataLoaded]);
 
   useEffect(() => {

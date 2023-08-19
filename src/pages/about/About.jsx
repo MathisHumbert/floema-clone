@@ -69,7 +69,6 @@ export default function About() {
 
       ScrollTrigger.create({
         trigger: el,
-        markers: true,
         onEnter: () => {
           el.groupLines.forEach((line, index) => {
             gsap.to(line, {

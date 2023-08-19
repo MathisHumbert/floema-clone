@@ -68,11 +68,6 @@ const LinkAnimation = ({ link, text }) => {
 
     element.current.addEventListener('mouseenter', onMouseEnter);
     element.current.addEventListener('mouseleave', onMouseLeave);
-
-    // return () => {
-    //   element.current.removeEventListener('mouseenter', onMouseEnter);
-    //   element.current.removeEventListener('mouseleave', onMouseLeave);
-    // };
   }, []);
 
   return (

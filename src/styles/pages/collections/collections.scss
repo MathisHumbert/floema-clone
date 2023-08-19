@@ -8,6 +8,10 @@
   &--active {
     @extend %page--active;
   }
+
+  &.collections--open {
+    z-index: z('content');
+  }
 }
 
 .collections__wrapper {

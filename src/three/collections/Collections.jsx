@@ -21,12 +21,12 @@ export default function Collections() {
     index: null,
     state: true,
   });
-  const mediasComponents = useRef();
   const collection = useRef();
   const collections = useRef();
   const collectionLinks = useRef();
   const titles = useRef();
   const titlesItems = useRef();
+  const details = useRef();
   const scroll = useRef({
     current: 0,
     target: 0,
@@ -48,42 +48,37 @@ export default function Collections() {
   useEffect(() => {
     if (!pageLoaded) return;
 
-    const galleryWrapperElement = document.querySelector(
-      '.collections__gallery__wrapper'
-    );
-    const mediasElements = document.querySelectorAll(
-      '.collections__gallery__media'
-    );
+    setMedias([...document.querySelectorAll('.collections__gallery__media')]);
+    setGalleryWrapper(document.querySelector('.collections__gallery__wrapper'));
 
-    const titlesElement = document.querySelector('.collections__titles');
-    const titlesItemsElements = document.querySelectorAll(
-      '.collections__titles__wrapper:nth-child(2) .collections__titles__item'
-    );
+    titles.current = document.querySelector('.collections__titles');
+    titlesItems.current = [
+      ...document.querySelectorAll(
+        '.collections__titles__wrapper:nth-child(2) .collections__titles__item'
+      ),
+    ];
 
-    const collectionsElement = document.querySelector('.collections');
-    const collectionsElements = document.querySelectorAll(
-      '.collections__article'
-    );
-    const collectionsElementsLinks = document.querySelectorAll(
-      '.collections__gallery__link'
-    );
+    collection.current = document.querySelector('.collections');
+    collections.current = [
+      ...document.querySelectorAll('.collections__article'),
+    ];
+    collectionLinks.current = [
+      ...document.querySelectorAll('.collections__gallery__link'),
+    ];
 
-    setMedias([...mediasElements]);
-    setGalleryWrapper(galleryWrapperElement);
+    details.current = [...document.querySelectorAll('.detail')];
 
-    titles.current = titlesElement;
-    titlesItems.current = [...titlesItemsElements];
-
-    collection.current = collectionsElement;
-    collections.current = [...collectionsElements];
-    collectionLinks.current = [...collectionsElementsLinks];
-
+    setVisible({ index: null, state: true });
     setDocumentsSelected(true);
   }, [pageLoaded]);
 
   useEffect(() => {
     if (!documentsSelected) return;
 
+    onResize();
+  }, [size, viewport, documentsSelected]);
+
+  const onResize = () => {
     scroll.current.last = scroll.current.target = 0;
 
     scroll.current.limit = galleryWrapper.clientWidth - medias[0].clientWidth;
@@ -95,7 +90,7 @@ export default function Collections() {
     titlesItems.current.forEach((element) => {
       element.bounds = getOffset(element);
     });
-  }, [size, viewport, documentsSelected]);
+  };
 
   const onOpen = (index) => {
     setVisible({
@@ -103,12 +98,15 @@ export default function Collections() {
       state: false,
     });
 
+    hit.current = null;
+    document.body.style.cursor = '';
+
     collection.current.classList.add('collections--open');
   };
 
-  const onClose = () => {
+  const onClose = (index) => {
     setVisible({
-      index: null,
+      index,
       state: true,
     });
 
@@ -116,7 +114,7 @@ export default function Collections() {
   };
 
   const onWheel = (event) => {
-    if (!documentsSelected) return;
+    if (!documentsSelected || !visible.state) return;
 
     const { pixelY } = normalizeWheel(event);
 
@@ -124,7 +122,7 @@ export default function Collections() {
   };
 
   const onTouchDown = (event) => {
-    if (!documentsSelected) return;
+    if (!documentsSelected || !visible.state) return;
 
     isDown.current = true;
 
@@ -135,7 +133,7 @@ export default function Collections() {
   };
 
   const onTouchMove = (event) => {
-    if (!documentsSelected) return;
+    if (!documentsSelected || !visible.state) return;
 
     raycaster.setFromCamera(pointer, camera);
 
@@ -152,6 +150,9 @@ export default function Collections() {
         hit.current = null;
         document.body.style.cursor = '';
       }
+    } else {
+      hit.current = null;
+      document.body.style.cursor = '';
     }
 
     if (!isDown.current) return;
@@ -164,6 +165,8 @@ export default function Collections() {
   };
 
   const onTouchUp = () => {
+    if (!documentsSelected || !visible.state) return;
+
     isDown.current = false;
 
     if (hit.current !== null && activeIndex.current === hit.current) {
@@ -289,7 +292,7 @@ export default function Collections() {
     onUpdateTitle();
   });
 
-  if (!pageLoaded || !medias) return null;
+  if (!pageLoaded || !documentsSelected) return null;
 
   return (
     <>
@@ -298,10 +301,12 @@ export default function Collections() {
           key={index}
           index={index}
           element={media}
+          detail={details.current[index]}
           geometry={planeGeometry}
           scroll={scroll.current}
           activeIndex={activeIndex}
           visible={visible}
+          onClose={onClose}
         />
       ))}
     </>
