@@ -11,6 +11,7 @@ export default function Media({
   geometry,
   scroll,
   speed,
+  visible,
 }) {
   const mesh = useRef();
   const bounds = useRef();
@@ -34,6 +35,8 @@ export default function Media({
   }, [texture]);
 
   useEffect(() => {
+    if (!visible) return;
+
     const timelineIn = gsap.timeline({
       delay: gsap.utils.random(0, 1.5),
       defaults: { duration: 2, ease: 'expo.inOut' },
@@ -51,7 +54,7 @@ export default function Media({
         { z: 0 },
         0
       );
-  }, []);
+  }, [visible]);
 
   useEffect(() => {
     const rect = element.getBoundingClientRect();

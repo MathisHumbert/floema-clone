@@ -11,6 +11,8 @@ import Media from './Media';
 export default function Home() {
   const [gallery, setGallery] = useState(null);
   const [medias, setMedias] = useState(null);
+  const [documentsSelected, setDocumentsSelected] = useState(false);
+  const [visible, setVisible] = useState(false);
   const scroll = useRef({
     current: 0,
     target: 0,
@@ -34,16 +36,16 @@ export default function Home() {
   useEffect(() => {
     if (!pageLoaded) return;
 
-    const galleryElement = document.querySelector('.home__gallery');
-    const mediasElements = document.querySelectorAll(
-      '.home__gallery__media__image'
-    );
+    setGallery(document.querySelector('.home__gallery'));
+    setMedias([...document.querySelectorAll('.home__gallery__media__image')]);
 
-    setGallery(galleryElement);
-    setMedias([...mediasElements]);
+    setVisible(true);
+    setDocumentsSelected(true);
   }, [pageLoaded]);
 
   const onWheel = (event) => {
+    if (!documentsSelected) return;
+
     const { pixelY } = normalizeWheel(event);
 
     scroll.current.target -= pixelY;
@@ -51,6 +53,8 @@ export default function Home() {
   };
 
   const onTouchDown = (event) => {
+    if (!documentsSelected) return;
+
     isDown.current = true;
 
     scroll.current.position = scroll.current.current;
@@ -60,7 +64,7 @@ export default function Home() {
   };
 
   const onTouchMove = (event) => {
-    if (!isDown.current) return;
+    if (!isDown.current || !documentsSelected) return;
 
     const y = event.touches ? event.touches[0].clientY : event.clientY;
     const distance = scroll.current.start - y;
@@ -69,6 +73,8 @@ export default function Home() {
   };
 
   const onTouchUp = () => {
+    if (!documentsSelected) return;
+
     isDown.current = false;
   };
 
@@ -101,7 +107,7 @@ export default function Home() {
     scroll.current.last = scroll.current.current;
   });
 
-  if (!pageLoaded || !gallery || !medias) return null;
+  if (!pageLoaded || !documentsSelected) return null;
 
   return (
     <>
@@ -113,6 +119,7 @@ export default function Home() {
           geometry={planeGeometry}
           scroll={scroll.current}
           speed={speed.current}
+          visible={visible}
         />
       ))}
     </>

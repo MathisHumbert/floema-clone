@@ -21,13 +21,18 @@ const PageContext = createContext({
   setPage: () => {},
   loadPage: () => {},
   asynconPageChange: async () => {},
+  preloaded: false,
+  preloadedPercent: 0,
 });
 
 export function PageProvider({ children }) {
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [preloaded, setPreloaded] = useState(false);
   const [data, setData] = useState({});
   const [pageLoaded, setPageLoaded] = useState(false);
   const [page, setPage] = useState(window.location.pathname);
+  const preloaderElement = useRef(null);
+  const preloaderLength = useRef(0);
   const transitionElement = useRef();
   const transtionContext = useRef();
   const transtionProgress = useRef({ value: 0 });
@@ -112,20 +117,27 @@ export function PageProvider({ children }) {
 
     const textureLoader = new TextureLoader();
 
-    const texturePromises = assets.map((asset) => {
+    const loadTextures = assets.map((asset) => {
       return new Promise((resolve) => {
         textureLoader.load(asset, (texture) => {
           window.TEXTURES[asset] = texture;
+          onTextureLoaded(assets.length);
           resolve();
         });
       });
     });
 
-    await Promise.all(texturePromises);
+    const images = [...document.querySelectorAll('img')].filter(
+      (img) => img.getAttribute('src') !== null
+    );
 
-    setDataLoaded(true);
+    const loadImages = imagesLoaded(images, {
+      background: true,
+    });
 
-    // add preloader animation
+    preloaderElement.current = document.querySelector('.preloader__text');
+
+    await Promise.all([loadImages, loadTextures]);
   };
 
   const loadPage = () => {
@@ -146,12 +158,29 @@ export function PageProvider({ children }) {
     });
   };
 
+  const onTextureLoaded = (totalTexture) => {
+    if (preloaderElement.current === null) {
+      preloaderElement.current = document.querySelector(
+        '.preloader__number__text'
+      );
+    }
+
+    preloaderLength.current += 1;
+
+    preloaderElement.current.innerHTML = `${Math.round(
+      (preloaderLength.current / totalTexture) * 100
+    )}%`;
+
+    if (preloaderLength.current === totalTexture) {
+      setPreloaded(true);
+    }
+  };
+
   const onPageChange = () => {
     transtionColor.current = document
       .getElementById('page')
       .getAttribute('data-color');
 
-    // sow tranisition
     return new Promise((resolve) => {
       showTransition(resolve);
     });
@@ -227,12 +256,14 @@ export function PageProvider({ children }) {
       pageLoaded,
       setPageLoaded,
       dataLoaded,
+      setDataLoaded,
       page,
       setPage,
       loadPage,
       onPageChange,
+      preloaded,
     }),
-    [data, pageLoaded, dataLoaded, page]
+    [data, pageLoaded, dataLoaded, page, preloaded]
   );
 
   return (

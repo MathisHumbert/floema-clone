@@ -12,9 +12,7 @@ export default function About() {
   useEffect(() => {
     if (!pageLoaded) return;
 
-    const galleriesElements = document.querySelectorAll('.about__gallery');
-
-    setGalleries([...galleriesElements]);
+    setGalleries([...document.querySelectorAll('.about__gallery')]);
   }, [pageLoaded]);
 
   if (!pageLoaded || !galleries) return null;

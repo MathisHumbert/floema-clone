@@ -13,6 +13,7 @@ export default function Media({
   scroll,
   lenisScroll,
   galleryWidth,
+  visible,
 }) {
   const mesh = useRef();
   const bounds = useRef();
@@ -24,13 +25,23 @@ export default function Media({
     return {
       uniforms: {
         uTexture: { value: texture },
-        uAlpha: { value: 1 },
+        uAlpha: { value: 0 },
       },
       vertexShader: vertex,
       fragmentShader: fragment,
       transparent: true,
     };
   }, [texture]);
+
+  useEffect(() => {
+    if (!visible) return;
+
+    gsap.fromTo(
+      mesh.current.material.uniforms.uAlpha,
+      { value: 0 },
+      { value: 1 }
+    );
+  }, [visible]);
 
   useEffect(() => {
     const rect = element.getBoundingClientRect();

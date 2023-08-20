@@ -12,7 +12,7 @@ export default function Home() {
   const { dataLoaded, pageLoaded, data, loadPage } = usePage();
 
   useEffect(() => {
-    if (!dataLoaded) return;
+    if (!dataLoaded && !pageLoaded) return;
 
     loadPage();
   }, [dataLoaded]);

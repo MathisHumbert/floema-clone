@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { act, useFrame, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import normalizeWheel from 'normalize-wheel';
@@ -34,8 +34,6 @@ export default function Collections() {
     position: 0,
     start: 0,
     limit: 0,
-    velocity: 0,
-    direction: 'right',
     ease: 0.1,
   });
   const isDown = useRef(false);
@@ -268,12 +266,6 @@ export default function Collections() {
       scroll.current.target,
       scroll.current.ease
     );
-
-    if (scroll.current.current < scroll.current.last) {
-      scroll.current.direction = 'left';
-    } else if (scroll.current.current > scroll.current.last) {
-      scroll.current.direction = 'right';
-    }
 
     scroll.current.last = scroll.current.current;
 

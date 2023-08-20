@@ -10,6 +10,8 @@ export default function Gallery({ element, geometry }) {
   const [wrapper, setWrapper] = useState(null);
   const [medias, setMedias] = useState(null);
   const [images, setImages] = useState(null);
+  const [documentsSelected, setDocumentsSelected] = useState(false);
+  const [visible, setVisible] = useState(false);
   const group = useRef();
   const scroll = useRef({
     current: 0,
@@ -30,24 +32,23 @@ export default function Gallery({ element, geometry }) {
   const { size, viewport } = useThree();
 
   useEffect(() => {
-    const mediasElements = element.querySelectorAll('.about__gallery__media');
-    const imagesElements = element.querySelectorAll(
-      '.about__gallery__media__image'
-    );
-    const wrapperElement = element.querySelector('.about__gallery__wrapper');
+    setMedias([...element.querySelectorAll('.about__gallery__media')]);
+    setImages([...element.querySelectorAll('.about__gallery__media__image')]);
+    setWrapper(element.querySelector('.about__gallery__wrapper'));
 
-    setMedias([...mediasElements]);
-    setImages([...imagesElements]);
-    setWrapper(wrapperElement);
+    setDocumentsSelected(true);
+    setVisible(true);
   }, []);
 
   useEffect(() => {
-    if (!wrapper) return;
+    if (!documentsSelected) return;
 
     galleryWidth.current = (wrapper.clientWidth / size.width) * viewport.width;
   }, [size, viewport, wrapper]);
 
   const onTouchDown = (event) => {
+    if (!documentsSelected) return;
+
     isDown.current = true;
 
     scroll.current.position = scroll.current.current;
@@ -57,7 +58,7 @@ export default function Gallery({ element, geometry }) {
   };
 
   const onTouchMove = (event) => {
-    if (!isDown.current) return;
+    if (!isDown.current || !documentsSelected) return;
 
     const x = event.touches ? event.touches[0].clientX : event.clientX;
     const distance = scroll.current.start - x;
@@ -66,6 +67,8 @@ export default function Gallery({ element, geometry }) {
   };
 
   const onTouchUp = () => {
+    if (!documentsSelected) return;
+
     isDown.current = false;
   };
 
@@ -101,7 +104,7 @@ export default function Gallery({ element, geometry }) {
     group.current.position.y = y * viewport.height;
   });
 
-  if (!medias || !images || !wrapper) return null;
+  if (!documentsSelected) return null;
 
   return (
     <group ref={group}>
@@ -114,6 +117,7 @@ export default function Gallery({ element, geometry }) {
           scroll={scroll.current}
           lenisScroll={lenisScroll.current}
           galleryWidth={galleryWidth}
+          visible={visible}
         />
       ))}
     </group>

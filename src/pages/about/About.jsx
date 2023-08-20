@@ -16,16 +16,9 @@ export default function About() {
   const { dataLoaded, pageLoaded, data, loadPage } = usePage();
 
   useEffect(() => {
-    if (!dataLoaded) return;
+    if (!dataLoaded && !pageLoaded) return;
 
     loadPage();
-    paragraphAnimation();
-
-    window.addEventListener('resize', () => {
-      paragraphElements.current.forEach((el) => {
-        el.groupLines = calculate(el.lines);
-      });
-    });
   }, [dataLoaded]);
 
   useEffect(() => {
@@ -36,6 +29,14 @@ export default function About() {
     gsap.set(document.documentElement, {
       backgroundColor: element.current.getAttribute('data-background'),
       color: element.current.getAttribute('data-color'),
+    });
+
+    paragraphAnimation();
+
+    window.addEventListener('resize', () => {
+      paragraphElements.current.forEach((el) => {
+        el.groupLines = calculate(el.lines);
+      });
     });
   }, [pageLoaded]);
 

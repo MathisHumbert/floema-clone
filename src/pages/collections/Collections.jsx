@@ -12,10 +12,9 @@ export default function Collections() {
   const { dataLoaded, pageLoaded, data, loadPage } = usePage();
 
   useEffect(() => {
-    if (!dataLoaded) return;
+    if (!dataLoaded && !pageLoaded) return;
 
     loadPage();
-    paragraphAnimation();
   }, [dataLoaded]);
 
   useEffect(() => {
@@ -27,6 +26,8 @@ export default function Collections() {
       backgroundColor: element.current.getAttribute('data-background'),
       color: element.current.getAttribute('data-color'),
     });
+
+    paragraphAnimation();
   }, [pageLoaded]);
 
   const paragraphAnimation = () => {
